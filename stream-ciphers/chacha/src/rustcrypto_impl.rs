@@ -109,7 +109,7 @@ dispatch_light128!(m, Mach, {
     }
 });
 
-#[cfg(test)]
+//#[cfg(test)]
 impl<NonceSize, Rounds: Unsigned, IsX> ChaChaAny<NonceSize, Rounds, IsX> {
     pub fn try_apply_keystream_narrow(&mut self, data: &mut [u8]) -> Result<(), ()> {
         self.state
@@ -229,9 +229,9 @@ struct WideEnabled;
 impl AsBool for WideEnabled {
     const BOOL: bool = true;
 }
-#[cfg(test)]
+//#[cfg(test)]
 struct WideDisabled;
-#[cfg(test)]
+//#[cfg(test)]
 impl AsBool for WideDisabled {
     const BOOL: bool = false;
 }
