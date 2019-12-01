@@ -11,16 +11,16 @@ repository = "https://github.com/cryptocorrosion/hashes"
 edition = "2018"
 
 [dependencies]
-block-buffer = "0.7"
-digest = "0.8"
-lazy_static = { version = "1.2", optional = true }
+block-buffer = { git = "https://github.com/mesalock-linux/rustcrypto-utils-sgx" }
+digest =  { git = "https://github.com/mesalock-linux/rustcrypto-traits-sgx" }
+lazy_static = { version = "1.2", features = ["spin_no_std"], optional = true }
 
 [dev-dependencies]
-digest = { version = "0.8", features = ["dev"] }
+#digest = { version = "0.8", features = ["dev"] }
 
 [features]
-std = ["lazy_static"]
-default = ["std"]
+#std = ["lazy_static"]
+default = []
 
 [badges]
 travis-ci = { repository = "cryptocorrosion/cryptocorrosion" }

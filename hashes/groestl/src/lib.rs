@@ -3,12 +3,13 @@
 //! Implemenation of the Groestl hash function optimized for x86-64 systems.
 //! Makes use of sse2, ssse3, and aes extensions as available.
 
-#![cfg_attr(not(feature = "std"), no_std)]
+//#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 
 pub extern crate digest;
-#[cfg(feature = "std")]
-#[macro_use]
-extern crate lazy_static;
+//#[cfg(feature = "std")]
+//#[macro_use]
+//extern crate lazy_static;
 
 use block_buffer::byteorder::{BigEndian, ByteOrder, LE};
 use block_buffer::generic_array::typenum::{
@@ -20,7 +21,7 @@ use core::fmt::{Debug, Formatter, Result};
 use digest::generic_array::GenericArray as DGenericArray;
 pub use digest::Digest;
 
-mod compressor;
+pub mod compressor;
 use crate::compressor::{init1024, init512, of1024, of512, tf1024, tf512};
 
 #[repr(C, align(16))]
@@ -37,14 +38,14 @@ struct Compressor512 {
 }
 impl Compressor512 {
     fn new(block: Block512) -> Self {
-        let cv = init512(unsafe { CvBytes512 { block }.cv });
+        let cv = unsafe { init512( CvBytes512 { block }.cv ) };
         Compressor512 { cv }
     }
     fn input(&mut self, data: &BBGenericArray<u8, U64>) {
-        tf512(&mut self.cv, data);
+        unsafe { tf512(&mut self.cv, data.as_ptr()) };
     }
     fn finalize(mut self) -> Block512 {
-        of512(&mut self.cv);
+        unsafe { of512(&mut self.cv) };
         unsafe { CvBytes512 { cv: self.cv }.block }
     }
 }
@@ -60,14 +61,14 @@ struct Compressor1024 {
 }
 impl Compressor1024 {
     fn new(block: Block1024) -> Self {
-        let cv = init1024(unsafe { CvBytes1024 { block }.cv });
+        let cv = unsafe { init1024( CvBytes1024 { block }.cv ) };
         Compressor1024 { cv }
     }
     fn input(&mut self, data: &BBGenericArray<u8, U128>) {
-        tf1024(&mut self.cv, data);
+        unsafe { tf1024(&mut self.cv, data.as_ptr()) };
     }
     fn finalize(mut self) -> Block1024 {
-        of1024(&mut self.cv);
+        unsafe { of1024(&mut self.cv) };
         unsafe { CvBytes1024 { cv: self.cv }.block }
     }
 }

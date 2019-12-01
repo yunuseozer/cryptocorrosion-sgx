@@ -1,5 +1,5 @@
-use block_buffer::generic_array::typenum::{U128, U64};
-use block_buffer::generic_array::GenericArray;
+//use block_buffer::generic_array::typenum::{U128, U64};
+//use block_buffer::generic_array::GenericArray;
 use core::arch::x86_64::*;
 use core::ops::BitXor;
 
@@ -16,14 +16,14 @@ pub struct X4(__m128i, __m128i, __m128i, __m128i);
 
 #[derive(Copy, Clone)]
 pub struct X8(
-    __m128i,
-    __m128i,
-    __m128i,
-    __m128i,
-    __m128i,
-    __m128i,
-    __m128i,
-    __m128i,
+    pub __m128i,
+    pub __m128i,
+    pub __m128i,
+    pub __m128i,
+    pub __m128i,
+    pub __m128i,
+    pub __m128i,
+    pub __m128i,
 );
 
 impl X4 {
@@ -323,7 +323,7 @@ unsafe fn init512_impl(cv: X4) -> X4 {
 }
 
 #[inline(always)]
-unsafe fn transpose(i: X8) -> X8 {
+pub unsafe fn transpose(i: X8) -> X8 {
     let i = i.map(|x| {
         _mm_shuffle_epi8(
             x,
@@ -357,7 +357,7 @@ unsafe fn transpose(i: X8) -> X8 {
 
 /// transpose matrix to get output format
 #[inline(always)]
-unsafe fn transpose_inv(i: X8) -> X8 {
+pub unsafe fn transpose_inv(i: X8) -> X8 {
     let i = X8(
         _mm_unpacklo_epi64(i.0, i.1),
         _mm_unpackhi_epi64(i.0, i.1),
@@ -491,187 +491,187 @@ unsafe fn of1024_impl(cv: &mut X8) {
     cv.7 = p.7;
 }
 
-#[cfg(any(feature = "std", target_feature = "aes"))]
+//#[cfg(any(feature = "std", target_feature = "aes"))]
 pub mod aes {
     use super::*;
-    #[target_feature(enable = "sse2", enable = "ssse3", enable = "aes")]
+    //#[target_feature(enable = "sse2", enable = "ssse3", enable = "aes")]
     pub unsafe fn tf512(cv: &mut X4, data: *const u8) {
         tf512_impl(cv, data)
     }
-    #[target_feature(enable = "sse2", enable = "ssse3", enable = "aes")]
+    //#[target_feature(enable = "sse2", enable = "ssse3", enable = "aes")]
     pub unsafe fn of512(cv: &mut X4) {
         of512_impl(cv)
     }
-    #[target_feature(enable = "sse2", enable = "ssse3")]
+    //#[target_feature(enable = "sse2", enable = "ssse3")]
     pub unsafe fn init512(cv: X4) -> X4 {
         init512_impl(cv)
     }
-    #[target_feature(enable = "sse2", enable = "ssse3", enable = "aes")]
+    //#[target_feature(enable = "sse2", enable = "ssse3", enable = "aes")]
     pub unsafe fn tf1024(cv: &mut X8, data: *const u8) {
         tf1024_impl(cv, data)
     }
-    #[target_feature(enable = "sse2", enable = "ssse3", enable = "aes")]
+    //#[target_feature(enable = "sse2", enable = "ssse3", enable = "aes")]
     pub unsafe fn of1024(cv: &mut X8) {
         of1024_impl(cv)
     }
-    #[target_feature(enable = "sse2", enable = "ssse3")]
+    //#[target_feature(enable = "sse2", enable = "ssse3")]
     pub unsafe fn init1024(cv: X8) -> X8 {
         init1024_impl(cv)
     }
 }
 
-#[cfg(not(target_feature = "aes"))]
-#[cfg(any(feature = "std", target_feature = "ssse3"))]
-pub mod ssse3 {
-    use super::*;
-    #[target_feature(enable = "sse2", enable = "ssse3")]
-    pub unsafe fn tf512(cv: &mut X4, data: *const u8) {
-        tf512_impl(cv, data)
-    }
-    #[target_feature(enable = "sse2", enable = "ssse3")]
-    pub unsafe fn of512(cv: &mut X4) {
-        of512_impl(cv)
-    }
-    #[target_feature(enable = "sse2", enable = "ssse3")]
-    pub unsafe fn tf1024(cv: &mut X8, data: *const u8) {
-        tf1024_impl(cv, data)
-    }
-    #[target_feature(enable = "sse2", enable = "ssse3")]
-    pub unsafe fn of1024(cv: &mut X8) {
-        of1024_impl(cv)
-    }
-    pub use super::aes::{init1024, init512};
-}
-#[cfg(target_feature = "aes")]
+//#[cfg(not(target_feature = "aes"))]
+//#[cfg(any(feature = "std", target_feature = "ssse3"))]
+//pub mod ssse3 {
+//    use super::*;
+//    #[target_feature(enable = "sse2", enable = "ssse3")]
+//    pub unsafe fn tf512(cv: &mut X4, data: *const u8) {
+//        tf512_impl(cv, data)
+//    }
+//    #[target_feature(enable = "sse2", enable = "ssse3")]
+//    pub unsafe fn of512(cv: &mut X4) {
+//        of512_impl(cv)
+//    }
+//    #[target_feature(enable = "sse2", enable = "ssse3")]
+//    pub unsafe fn tf1024(cv: &mut X8, data: *const u8) {
+//        tf1024_impl(cv, data)
+//    }
+//    #[target_feature(enable = "sse2", enable = "ssse3")]
+//    pub unsafe fn of1024(cv: &mut X8) {
+//        of1024_impl(cv)
+//    }
+//    pub use super::aes::{init1024, init512};
+//}
+//#[cfg(target_feature = "aes")]
 pub use self::aes as ssse3;
 
-#[cfg(not(target_feature = "ssse3"))]
-#[cfg(any(feature = "std", target_feature = "sse2"))]
-pub mod sse2 {
-    use super::*;
-    #[target_feature(enable = "sse2")]
-    pub unsafe fn tf512(cv: &mut X4, data: *const u8) {
-        tf512_impl(cv, data)
-    }
-    #[target_feature(enable = "sse2")]
-    pub unsafe fn of512(cv: &mut X4) {
-        of512_impl(cv)
-    }
-    #[target_feature(enable = "sse2")]
-    pub unsafe fn init512(cv: X4) -> X4 {
-        init512_impl(cv)
-    }
-    #[target_feature(enable = "sse2")]
-    pub unsafe fn tf1024(cv: &mut X8, data: *const u8) {
-        tf1024_impl(cv, data)
-    }
-    #[target_feature(enable = "sse2")]
-    pub unsafe fn of1024(cv: &mut X8) {
-        of1024_impl(cv)
-    }
-    #[target_feature(enable = "sse2")]
-    pub unsafe fn init1024(cv: X8) -> X8 {
-        init1024_impl(cv)
-    }
-}
-#[cfg(target_feature = "ssse3")]
+//#[cfg(not(target_feature = "ssse3"))]
+//#[cfg(any(feature = "std", target_feature = "sse2"))]
+//pub mod sse2 {
+//    use super::*;
+//    #[target_feature(enable = "sse2")]
+//    pub unsafe fn tf512(cv: &mut X4, data: *const u8) {
+//        tf512_impl(cv, data)
+//    }
+//    #[target_feature(enable = "sse2")]
+//    pub unsafe fn of512(cv: &mut X4) {
+//        of512_impl(cv)
+//    }
+//    #[target_feature(enable = "sse2")]
+//    pub unsafe fn init512(cv: X4) -> X4 {
+//        init512_impl(cv)
+//    }
+//    #[target_feature(enable = "sse2")]
+//    pub unsafe fn tf1024(cv: &mut X8, data: *const u8) {
+//        tf1024_impl(cv, data)
+//    }
+//    #[target_feature(enable = "sse2")]
+//    pub unsafe fn of1024(cv: &mut X8) {
+//        of1024_impl(cv)
+//    }
+//    #[target_feature(enable = "sse2")]
+//    pub unsafe fn init1024(cv: X8) -> X8 {
+//        init1024_impl(cv)
+//    }
+//}
+//#[cfg(target_feature = "ssse3")]
 pub use self::ssse3 as sse2;
 
-#[cfg(all(not(feature = "std"), target_feature = "sse2"))]
+//#[cfg(all(not(feature = "std"), target_feature = "sse2"))]
 pub use self::sse2::*;
 
-#[cfg(feature = "std")]
-mod autodetect {
-    use super::*;
-    type Tf<T> = unsafe fn(cv: &mut T, data: *const u8);
-    type Of<T> = unsafe fn(cv: &mut T);
-    type Init<T> = unsafe fn(cv: T) -> T;
-    macro_rules! dispatch {
-        ($fn:ident, $ty:ty) => {
-            fn dispatch_init() -> $ty {
-                if is_x86_feature_detected!("aes") {
-                    aes::$fn
-                } else if is_x86_feature_detected!("ssse3") {
-                    ssse3::$fn
-                } else if is_x86_feature_detected!("sse2") {
-                    sse2::$fn
-                } else {
-                    panic!("groestl_aesni requires at least sse2 (not detected)")
-                }
-            }
-            lazy_static! {
-                static ref IMPL: $ty = { dispatch_init() };
-            }
-        };
-    }
-    #[inline]
-    pub fn tf512(cv: &mut X4, data: &GenericArray<u8, U64>) {
-        dispatch!(tf512, Tf<X4>);
-        unsafe { IMPL(cv, data.as_ptr()) }
-    }
-    #[inline]
-    pub fn of512(cv: &mut X4) {
-        dispatch!(of512, Of<X4>);
-        unsafe { IMPL(cv) }
-    }
-    #[inline]
-    pub fn init512(cv: X4) -> X4 {
-        dispatch!(init512, Init<X4>);
-        unsafe { IMPL(cv) }
-    }
-    #[inline]
-    pub fn tf1024(cv: &mut X8, data: &GenericArray<u8, U128>) {
-        dispatch!(tf1024, Tf<X8>);
-        unsafe { IMPL(cv, data.as_ptr()) }
-    }
-    #[inline]
-    pub fn of1024(cv: &mut X8) {
-        dispatch!(of1024, Of<X8>);
-        unsafe { IMPL(cv) }
-    }
-    #[inline]
-    pub fn init1024(cv: X8) -> X8 {
-        dispatch!(init1024, Init<X8>);
-        unsafe { IMPL(cv) }
+//#[cfg(feature = "std")]
+//mod autodetect {
+//    use super::*;
+//    type Tf<T> = unsafe fn(cv: &mut T, data: *const u8);
+//    type Of<T> = unsafe fn(cv: &mut T);
+//    type Init<T> = unsafe fn(cv: T) -> T;
+//    macro_rules! dispatch {
+//        ($fn:ident, $ty:ty) => {
+//            fn dispatch_init() -> $ty {
+//                //if is_x86_feature_detected!("aes") {
+//                    aes::$fn
+//                //} else if is_x86_feature_detected!("ssse3") {
+//                //    ssse3::$fn
+//                //} else if is_x86_feature_detected!("sse2") {
+//                //    sse2::$fn
+//                //} else {
+//                //    panic!("groestl_aesni requires at least sse2 (not detected)")
+//                //}
+//            }
+//            lazy_static! {
+//                static ref IMPL: $ty = { dispatch_init() };
+//            }
+//        };
+//    }
+//    #[inline]
+//    pub fn tf512(cv: &mut X4, data: &GenericArray<u8, U64>) {
+//        dispatch!(tf512, Tf<X4>);
+//        unsafe { IMPL(cv, data.as_ptr()) }
+//    }
+//    #[inline]
+//    pub fn of512(cv: &mut X4) {
+//        dispatch!(of512, Of<X4>);
+//        unsafe { IMPL(cv) }
+//    }
+//    #[inline]
+//    pub fn init512(cv: X4) -> X4 {
+//        dispatch!(init512, Init<X4>);
+//        unsafe { IMPL(cv) }
+//    }
+//    #[inline]
+//    pub fn tf1024(cv: &mut X8, data: &GenericArray<u8, U128>) {
+//        dispatch!(tf1024, Tf<X8>);
+//        unsafe { IMPL(cv, data.as_ptr()) }
+//    }
+//    #[inline]
+//    pub fn of1024(cv: &mut X8) {
+//        dispatch!(of1024, Of<X8>);
+//        unsafe { IMPL(cv) }
+//    }
+//    #[inline]
+//    pub fn init1024(cv: X8) -> X8 {
+//        dispatch!(init1024, Init<X8>);
+//        unsafe { IMPL(cv) }
+//    }
+//}
+////#[cfg(feature = "std")]
+//pub use self::autodetect::*;
+
+use core::cmp::PartialEq;
+use core::fmt::{Debug, Formatter, Result};
+impl Debug for X8 {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        unsafe {
+            f.debug_tuple("X8")
+                .field(&(_mm_extract_epi64(self.0, 0), _mm_extract_epi64(self.0, 1)))
+                .field(&(_mm_extract_epi64(self.1, 0), _mm_extract_epi64(self.1, 1)))
+                .field(&(_mm_extract_epi64(self.2, 0), _mm_extract_epi64(self.2, 1)))
+                .field(&(_mm_extract_epi64(self.3, 0), _mm_extract_epi64(self.3, 1)))
+                .field(&(_mm_extract_epi64(self.4, 0), _mm_extract_epi64(self.4, 1)))
+                .field(&(_mm_extract_epi64(self.5, 0), _mm_extract_epi64(self.5, 1)))
+                .field(&(_mm_extract_epi64(self.6, 0), _mm_extract_epi64(self.6, 1)))
+                .field(&(_mm_extract_epi64(self.7, 0), _mm_extract_epi64(self.7, 1)))
+                .finish()
+        }
     }
 }
-#[cfg(feature = "std")]
-pub use self::autodetect::*;
+impl PartialEq for X8 {
+    fn eq(&self, rhs: &Self) -> bool {
+        unsafe {
+            let e = (*self, *rhs).map(|x, y| _mm_cmpeq_epi8(x, y));
+            let e = _mm_and_si128(
+                _mm_and_si128(_mm_and_si128(e.0, e.1), _mm_and_si128(e.2, e.3)),
+                _mm_and_si128(_mm_and_si128(e.4, e.5), _mm_and_si128(e.6, e.7)),
+            );
+            _mm_extract_epi64(e, 0) & _mm_extract_epi64(e, 1) == 0xffff_ffff_ffff_ffffu64 as i64
+        }
+    }
+}
 
 #[cfg(test)]
 mod test {
     use super::*;
-
-    use core::cmp::PartialEq;
-    use core::fmt::{Debug, Formatter, Result};
-    impl Debug for X8 {
-        fn fmt(&self, f: &mut Formatter) -> Result {
-            unsafe {
-                f.debug_tuple("X8")
-                    .field(&(_mm_extract_epi64(self.0, 0), _mm_extract_epi64(self.0, 1)))
-                    .field(&(_mm_extract_epi64(self.1, 0), _mm_extract_epi64(self.1, 1)))
-                    .field(&(_mm_extract_epi64(self.2, 0), _mm_extract_epi64(self.2, 1)))
-                    .field(&(_mm_extract_epi64(self.3, 0), _mm_extract_epi64(self.3, 1)))
-                    .field(&(_mm_extract_epi64(self.4, 0), _mm_extract_epi64(self.4, 1)))
-                    .field(&(_mm_extract_epi64(self.5, 0), _mm_extract_epi64(self.5, 1)))
-                    .field(&(_mm_extract_epi64(self.6, 0), _mm_extract_epi64(self.6, 1)))
-                    .field(&(_mm_extract_epi64(self.7, 0), _mm_extract_epi64(self.7, 1)))
-                    .finish()
-            }
-        }
-    }
-    impl PartialEq for X8 {
-        fn eq(&self, rhs: &Self) -> bool {
-            unsafe {
-                let e = (*self, *rhs).map(|x, y| _mm_cmpeq_epi8(x, y));
-                let e = _mm_and_si128(
-                    _mm_and_si128(_mm_and_si128(e.0, e.1), _mm_and_si128(e.2, e.3)),
-                    _mm_and_si128(_mm_and_si128(e.4, e.5), _mm_and_si128(e.6, e.7)),
-                );
-                _mm_extract_epi64(e, 0) & _mm_extract_epi64(e, 1) == 0xffff_ffff_ffff_ffffu64 as i64
-            }
-        }
-    }
 
     #[test]
     fn test_transpose_invertible() {

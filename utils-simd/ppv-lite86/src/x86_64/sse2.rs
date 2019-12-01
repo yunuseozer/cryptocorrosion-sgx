@@ -410,7 +410,7 @@ impl<S3, S4, NI> MultiLane<[u128; 1]> for u128x1_sse2<S3, S4, NI> {
         unimplemented!()
     }
     #[inline(always)]
-    fn from_lanes(xs: [u128; 1]) -> Self {
+    fn from_lanes(_xs: [u128; 1]) -> Self {
         unimplemented!()
     }
 }
@@ -780,7 +780,8 @@ impl<S4, NI> BSwap for u128x1_sse2<YesS3, S4, NI> {
 impl<S4, NI> BSwap for u128x1_sse2<NoS3, S4, NI> {
     #[inline(always)]
     fn bswap(self) -> Self {
-        Self::new(unsafe { unimplemented!() })
+        //Self::new(unsafe { unimplemented!() })
+        unimplemented!()
     }
 }
 
@@ -1078,11 +1079,11 @@ impl<W: PartialEq, G> PartialEq for x2<W, G> {
     }
 }
 
-#[inline(always)]
-unsafe fn eq128_s4(x: __m128i, y: __m128i) -> bool {
-    let q = _mm_shuffle_epi32(_mm_cmpeq_epi64(x, y), 0b1100_0110);
-    _mm_cvtsi128_si64(q) == -1
-}
+//#[inline(always)]
+//unsafe fn eq128_s4(x: __m128i, y: __m128i) -> bool {
+//    let q = _mm_shuffle_epi32(_mm_cmpeq_epi64(x, y), 0b1100_0110);
+//    _mm_cvtsi128_si64(q) == -1
+//}
 
 #[inline(always)]
 unsafe fn eq128_s2(x: __m128i, y: __m128i) -> bool {

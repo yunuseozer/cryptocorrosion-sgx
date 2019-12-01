@@ -9,10 +9,10 @@ keywords = ["crypto", "skein", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-block-buffer = "0.7"
-block-padding = "0.1.0"
-digest = "0.8"
-threefish-cipher = "0.3"
+block-buffer = { git = "https://github.com/mesalock-linux/rustcrypto-utils-sgx" }
+block-padding = { git = "https://github.com/mesalock-linux/rustcrypto-utils-sgx" }
+digest = { git = "https://github.com/mesalock-linux/rustcrypto-traits-sgx" }
+threefish-cipher = { git = "https://github.com/mesalock-linux/cryptocorrosion-sgx" }
 
 [dev-dependencies]
-digest = { version = "0.8", features = ["dev"] }
+#digest = { version = "0.8", features = ["dev"] }

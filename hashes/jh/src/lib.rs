@@ -2,7 +2,8 @@
 
 //! Portable JH with optimizations for x86-64
 
-#![cfg_attr(not(feature = "std"), no_std)]
+//#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 
 pub extern crate digest;
 #[macro_use]

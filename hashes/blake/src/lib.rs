@@ -2,13 +2,14 @@
 
 //! BLAKE, the SHA-3 hash finalist based on the ChaCha cipher
 
-#![cfg_attr(not(feature = "std"), no_std)]
-#[cfg(feature = "std")]
-use std as core;
+#![no_std]
+//#![cfg_attr(not(feature = "std"), no_std)]
+//#[cfg(feature = "std")]
+//use std as core;
 
 extern crate block_buffer;
 pub extern crate digest;
-#[macro_use]
+//#[macro_use]
 pub extern crate simd;
 
 mod consts;
