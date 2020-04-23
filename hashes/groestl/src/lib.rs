@@ -4,12 +4,20 @@
 //! Makes use of sse2, ssse3, and aes extensions as available.
 
 //#![cfg_attr(not(feature = "std"), no_std)]
-#![no_std]
+#![cfg_attr(all(feature = "mesalock_sgx",
+                not(target_env = "sgx")), no_std)]
+#![cfg_attr(all(target_env = "sgx", target_vendor = "mesalock"), feature(rustc_private))]
+
+#[cfg(all(feature = "mesalock_sgx", not(target_env = "sgx")))]
+#[macro_use]
+extern crate sgx_tstd as std;
+
+use std::prelude::v1::*;
 
 pub extern crate digest;
-//#[cfg(feature = "std")]
-//#[macro_use]
-//extern crate lazy_static;
+#[cfg(feature = "std")]
+#[macro_use]
+extern crate lazy_static;
 
 use block_buffer::byteorder::{BigEndian, ByteOrder, LE};
 use block_buffer::generic_array::typenum::{
@@ -38,14 +46,14 @@ struct Compressor512 {
 }
 impl Compressor512 {
     fn new(block: Block512) -> Self {
-        let cv = unsafe { init512( CvBytes512 { block }.cv ) };
+        let cv = init512(unsafe { CvBytes512 { block }.cv });
         Compressor512 { cv }
     }
     fn input(&mut self, data: &BBGenericArray<u8, U64>) {
-        unsafe { tf512(&mut self.cv, data.as_ptr()) };
+        tf512(&mut self.cv, data);
     }
     fn finalize(mut self) -> Block512 {
-        unsafe { of512(&mut self.cv) };
+        of512(&mut self.cv);
         unsafe { CvBytes512 { cv: self.cv }.block }
     }
 }
@@ -61,14 +69,14 @@ struct Compressor1024 {
 }
 impl Compressor1024 {
     fn new(block: Block1024) -> Self {
-        let cv = unsafe { init1024( CvBytes1024 { block }.cv ) };
+        let cv = init1024(unsafe { CvBytes1024 { block }.cv });
         Compressor1024 { cv }
     }
     fn input(&mut self, data: &BBGenericArray<u8, U128>) {
-        unsafe { tf1024(&mut self.cv, data.as_ptr()) };
+        tf1024(&mut self.cv, data);
     }
     fn finalize(mut self) -> Block1024 {
-        unsafe { of1024(&mut self.cv) };
+        of1024(&mut self.cv);
         unsafe { CvBytes1024 { cv: self.cv }.block }
     }
 }
