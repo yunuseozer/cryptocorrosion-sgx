@@ -2,10 +2,20 @@
 
 //! BLAKE, the SHA-3 hash finalist based on the ChaCha cipher
 
-#![no_std]
+//#![no_std]
 //#![cfg_attr(not(feature = "std"), no_std)]
 //#[cfg(feature = "std")]
 //use std as core;
+#![cfg_attr(all(target_env = "sgx", target_vendor = "mesalock"), feature(rustc_private))]
+
+#![cfg_attr(
+    any(not(feature = "std"),
+    all(feature = "mesalock_sgx",
+                not(target_env = "sgx"))), no_std)]
+
+#[cfg(all(feature = "std", feature = "mesalock_sgx", not(target_env = "sgx")))]
+#[macro_use]
+extern crate sgx_tstd as std;
 
 extern crate block_buffer;
 pub extern crate digest;
@@ -16,7 +26,7 @@ mod consts;
 
 use block_buffer::byteorder::{ByteOrder, BE};
 use block_buffer::BlockBuffer;
-use core::mem;
+use std::mem;
 use digest::generic_array::typenum::{PartialDiv, Unsigned, U2};
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
@@ -175,8 +185,8 @@ macro_rules! define_hasher {
             }
         }
 
-        impl core::fmt::Debug for $name {
-            fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
+        impl std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
                 f.debug_struct("(Blake)").finish()
             }
         }
