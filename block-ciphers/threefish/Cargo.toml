@@ -10,8 +10,8 @@ keywords = ["crypto", "threefish", "gost", "block-cipher"]
 
 [dependencies]
 generic-array = "0.12"
-byteorder = { git = "https://github.com/mesalock-linux/byteorder-sgx" }
-block-cipher-trait = { git = "https://github.com/mesalock-linux/rustcrypto-traits-sgx" }
+byteorder = { git = "https://github.com/yunuseozer/byteorder-sgx" }
+block-cipher-trait = { git = "https://github.com/yunuseozer/rustcrypto-traits-sgx" }
 
 [dev-dependencies]
 hex-literal = "0.2"
